@@ -3,7 +3,10 @@ open Lwt
 module Main (C: V1_LWT.CONSOLE) (CLOCK: V1.CLOCK) = struct
 
   let get_time_string = fun clock ->
-    CLOCK.time clock |> string_of_float
+    CLOCK.time clock |>
+    Ptime.of_float_s |> function
+      | Some time -> Ptime.to_rfc3339 ~frac:3 time
+      | None -> failwith "Invalid span from CLOCK.time"
 
   let start console clock =
     for_lwt i = 0 to 4 do
