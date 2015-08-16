@@ -1,0 +1,10 @@
+*.swp
+Makefile
+_build
+console.xe
+console.xl
+console_libvirt.xml
+log
+main.ml
+main.native
+mir-console
