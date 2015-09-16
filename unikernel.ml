@@ -18,10 +18,15 @@ module Main (C: V1_LWT.CONSOLE) (CLOCK: V1.CLOCK) = struct
       | None -> failwith "Invalid span from CLOCK.time"
 
   let start console clock =
+    let log = C.log console in
     for_lwt i = 0 to 4 do
       lwt () = OS.Time.sleep 1.0 in
-      C.log console ( "the time from CLOCK.time is: "^(get_time_string_old_api ())) ;
-      C.log console ( "the time from CLOCK.now_d_ps is: "^(get_time_string_new_api ())) ;
+      log (Printf.sprintf "the utc time from CLOCK.time is: %s"
+        (get_time_string_old_api ())) ;
+      log (Printf.sprintf "the utc time from CLOCK.now_d_ps is: %s"
+        (get_time_string_new_api ()) );
+      log (Printf.sprintf "the local time offset from UTC (CLOCK.current_tz_offset_s) is: %d"
+        (CLOCK.current_tz_offset_s ()));
       return ()
     done
 
