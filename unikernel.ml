@@ -22,12 +22,15 @@ module Main (C: V1_LWT.CONSOLE) (CLOCK: V1.CLOCK) = struct
     for_lwt i = 0 to 4 do
       lwt () = OS.Time.sleep 1.0 in
       log (Printf.sprintf "the utc time from CLOCK.time is: %s"
-        (get_time_string_old_api ())) ;
+        (get_time_string_old_api ()));
       log (Printf.sprintf "the utc time from CLOCK.now_d_ps is: %s"
-        (get_time_string_new_api ()) );
+        (get_time_string_new_api ()));
       log (Printf.sprintf "the local time offset from UTC (CLOCK.current_tz_offset_s) is: %d"
         (CLOCK.current_tz_offset_s ()));
-      return ()
+      match CLOCK.period_d_ps () with
+        | Some p ->
+          return (log (Format.asprintf "the picosecond period of the clock
+          (CLOCK.period_d_ps) is: %a" Ptime.Span.pp (Ptime.Span.of_d_ps p)))
+        | None -> return (log "Clock period unavailable")
     done
-
 end
