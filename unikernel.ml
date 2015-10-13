@@ -28,9 +28,8 @@ module Main (C: V1_LWT.CONSOLE) (CLOCK: V1.CLOCK) = struct
       log (Printf.sprintf "the local time offset from UTC (CLOCK.current_tz_offset_s) is: %d"
         (CLOCK.current_tz_offset_s ()));
       match CLOCK.period_d_ps () with
-        | Some p ->
-          return (log (Format.asprintf "the picosecond period of the clock
-          (CLOCK.period_d_ps) is: %a" Ptime.Span.pp (Ptime.Span.of_d_ps p)))
+        | Some (d, ps) -> return (
+          log ( Printf.sprintf "the period of the clock (CLOCK.period_d_ps) is: %d days %Ld ps" d ps))
         | None -> return (log "Clock period unavailable")
     done
 end
