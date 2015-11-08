@@ -25,8 +25,10 @@ module Main (C: V1_LWT.CONSOLE) (CLOCK: V1.CLOCK) (PCLOCK: V1.PCLOCK) = struct
         (get_time_string_old_api ()));
       log (Printf.sprintf "the utc time from PCLOCK.now_d_ps is: %s"
         (get_time_string_new_api ()));
-      log (Printf.sprintf "the local time offset from UTC (PCLOCK.current_tz_offset_s) is: %d"
-        (PCLOCK.current_tz_offset_s ()));
+      match PCLOCK.current_tz_offset_s () with
+        | Some offset ->
+            return @@ log (Printf.sprintf "the local time offset from UTC (PCLOCK.current_tz_offset_s) is: %d" offset)
+        | None -> log "Clock local time offset unavailable";
       match PCLOCK.period_d_ps () with
         | Some (d, ps) -> return (
           log ( Printf.sprintf "the period of the clock (PCLOCK.period_d_ps) is: %d days %Ld ps" d ps))
