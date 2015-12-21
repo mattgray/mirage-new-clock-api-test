@@ -1,37 +1,57 @@
 open Lwt
 
-module Main (C: V1_LWT.CONSOLE) (CLOCK: V1.CLOCK) (PCLOCK: V1.PCLOCK) = struct
+module Main
+  (C: V1_LWT.CONSOLE)
+  (CLOCK: V1.CLOCK)
+  (PCLOCK: V1.PCLOCK)
+  (MCLOCK: V1.MCLOCK) = struct
 
-  let get_time_string_old_api = fun () ->
+  let clock_rfc3339 () =
     CLOCK.time () |>
     Ptime.of_float_s |>
     function
       | Some time -> Ptime.to_rfc3339 ~frac:3 time
+        |> Printf.sprintf "RFC3339 CLOCK.time: %s"
       | None -> failwith "Invalid span from CLOCK.time"
 
-  let get_time_string_new_api = fun () ->
+  let pclock_rfc3339 () =
     PCLOCK.now_d_ps () |>
     Ptime.Span.of_d_ps |>
     Ptime.of_span |>
     function
       | Some time -> Ptime.to_rfc3339 ~frac:3 time
+        |> Printf.sprintf "RFC3339 PCLOCK.now_d_ps: %s"
       | None -> failwith "Invalid span from PCLOCK.now_d_ps"
 
-  let start console clock pclock =
-    let log = C.log console in
+  let pclock_offset () =
+    PCLOCK.current_tz_offset_s () |> function
+      | Some offset -> Printf.sprintf "PCLOCK.current_tz_offset_s = %d" offset
+      | None -> "PCLOCK.current_tz_offset_s = None"
+
+  let pclock_period () =
+    PCLOCK.period_d_ps () |>
+    function
+      | Some (d, ps) ->
+          Printf.sprintf "PCLOCK.period_d_ps (days, picoseconds) = (%d, %Ld)" d ps
+      | None -> "PCLOCK.period_d_ps = None"
+
+  let mclock_elapsed () =
+    MCLOCK.elapsed_ns () |>
+    Printf.sprintf "MCLOCK.elapsed_ns () = %Ld"
+
+  let checks = [
+    clock_rfc3339;
+    pclock_rfc3339;
+    pclock_offset;
+    pclock_period;
+    mclock_elapsed
+  ]
+
+  let start console clock pclock mclock =
+    let log f = C.log console (f ()) in
     for_lwt i = 0 to 4 do
       lwt () = OS.Time.sleep 1.0 in
-      log (Printf.sprintf "the utc time from CLOCK.time is: %s"
-        (get_time_string_old_api ()));
-      log (Printf.sprintf "the utc time from PCLOCK.now_d_ps is: %s"
-        (get_time_string_new_api ()));
-      match PCLOCK.current_tz_offset_s () with
-        | Some offset ->
-            return @@ log (Printf.sprintf "the local time offset from UTC (PCLOCK.current_tz_offset_s) is: %d" offset)
-        | None -> log "Clock local time offset unavailable";
-      match PCLOCK.period_d_ps () with
-        | Some (d, ps) -> return (
-          log ( Printf.sprintf "the period of the clock (PCLOCK.period_d_ps) is: %d days %Ld ps" d ps))
-        | None -> return (log "Clock period unavailable")
+      List.iter log checks;
+      Lwt.return_unit;
     done
 end
