@@ -10,16 +10,16 @@ module Main
     CLOCK.time () |>
     Ptime.of_float_s |>
     function
-      | Some time -> Ptime.to_rfc3339 ~frac:3 time
+      | Some time -> Ptime.to_rfc3339 ~frac_s:3 time
         |> Printf.sprintf "RFC3339 CLOCK.time: %s"
       | None -> failwith "Invalid span from CLOCK.time"
 
   let pclock_rfc3339 () =
     PCLOCK.now_d_ps () |>
-    Ptime.Span.of_d_ps |>
+    Ptime.Span.unsafe_of_d_ps |>
     Ptime.of_span |>
     function
-      | Some time -> Ptime.to_rfc3339 ~frac:3 time
+      | Some time -> Ptime.to_rfc3339 ~frac_s:3 time
         |> Printf.sprintf "RFC3339 PCLOCK.now_d_ps: %s"
       | None -> failwith "Invalid span from PCLOCK.now_d_ps"
 
