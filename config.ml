@@ -1,7 +1,7 @@
 open Mirage
 
 let main =
-  let libraries = ["ptime"] in
+  let libraries = ["ptime"; "lwt.ppx"] in
   let packages =  ["ptime"] in
   foreign
     ~libraries ~packages

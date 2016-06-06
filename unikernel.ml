@@ -49,8 +49,8 @@ module Main
 
   let start console clock pclock mclock =
     let log f = C.log console (f ()) in
-    for_lwt i = 0 to 4 do
-      lwt () = OS.Time.sleep 1.0 in
+    for%lwt i = 0 to 4 do
+      let%lwt _ = OS.Time.sleep 1.0 in
       List.iter log checks;
       Lwt.return_unit;
     done
